@@ -43,10 +43,14 @@ public abstract class ClassScanner {
             String className = classNames.nextElement();
             if (isTargetClassName(className)) {
                 //Class<?> aClass = Class.forName(className);//java.lang.ExceptionInInitializerError
-                //Class<?> aClass = Class.forName(className, false, classLoader);//tested on 魅蓝Note(M463C)_Android4.4.4 and Mi2s_Android5.1.1
-                Class<?> aClass = classLoader.loadClass(className);//tested on 魅蓝Note(M463C)_Android4.4.4 and Mi2s_Android5.1.1
-                if (isTargetClass(aClass)) {
-                    result.add(aClass);
+                try {
+                    Class<?> aClass = Class.forName(className, false, classLoader);//tested on 魅蓝Note(M463C)_Android4.4.4 and Mi2s_Android5.1.1
+                    //Class<?> aClass = classLoader.loadClass(className);//tested on 魅蓝Note(M463C)_Android4.4.4 and Mi2s_Android5.1.1
+                    if (isTargetClass(aClass)) {
+                        result.add(aClass);
+                    }
+                } catch (ClassNotFoundException e) {
+                    System.err.println("Couldn't find class " + className);
                 }
             }
         }
