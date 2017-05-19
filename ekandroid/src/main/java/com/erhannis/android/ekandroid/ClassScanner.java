@@ -7,12 +7,13 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import dalvik.system.DexFile;
 import dalvik.system.PathClassLoader;
-import java8.util.function.Consumer;
 
 /**
  * http://stackoverflow.com/users/1632448/fantouch
@@ -30,13 +31,14 @@ public abstract class ClassScanner {
         return mContext;
     }
 
-    void scan() throws IOException, ClassNotFoundException, NoSuchMethodException {
+    List<Class> scan() throws IOException, ClassNotFoundException, NoSuchMethodException {
         long timeBegin = System.currentTimeMillis();
 
         PathClassLoader classLoader = (PathClassLoader) getContext().getClassLoader();
         //PathClassLoader classLoader = (PathClassLoader) Thread.currentThread().getContextClassLoader();//This also works good
         DexFile dexFile = new DexFile(getContext().getPackageCodePath());
         Enumeration<String> classNames = dexFile.entries();
+        ArrayList<Class> result = new ArrayList<Class>();
         while (classNames.hasMoreElements()) {
             String className = classNames.nextElement();
             if (isTargetClassName(className)) {
@@ -44,7 +46,7 @@ public abstract class ClassScanner {
                 //Class<?> aClass = Class.forName(className, false, classLoader);//tested on 魅蓝Note(M463C)_Android4.4.4 and Mi2s_Android5.1.1
                 Class<?> aClass = classLoader.loadClass(className);//tested on 魅蓝Note(M463C)_Android4.4.4 and Mi2s_Android5.1.1
                 if (isTargetClass(aClass)) {
-                    onScanResult(aClass);
+                    result.add(aClass);
                 }
             }
         }
@@ -52,24 +54,33 @@ public abstract class ClassScanner {
         long timeEnd = System.currentTimeMillis();
         long timeElapsed = timeEnd - timeBegin;
         Log.d(TAG, "scan() cost " + timeElapsed + "ms");
+        return result;
     }
 
     protected abstract boolean isTargetClassName(String className);
 
     protected abstract boolean isTargetClass(Class clazz);
 
-    protected abstract void onScanResult(Class clazz);
-
     //// Implementations
 
-    public static void getConcreteDescendants(Context context, final Class<?> parentClass, String classNameRegex, final Consumer<Class> callback) throws NoSuchMethodException, IOException, ClassNotFoundException {
+    /**
+     *
+     * @param context
+     * @param parentClass
+     * @param classNameRegex May be null to allow all
+     * @return
+     * @throws NoSuchMethodException
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static List<Class> getConcreteDescendants(Context context, final Class<?> parentClass, String classNameRegex) throws NoSuchMethodException, IOException, ClassNotFoundException {
         final Pattern classNamePattern;
         if (classNameRegex != null) {
             classNamePattern = Pattern.compile(classNameRegex);
         } else {
             classNamePattern = null;
         }
-        new ClassScanner(context) {
+        return new ClassScanner(context) {
 
             @Override
             protected boolean isTargetClassName(String className) {
@@ -88,10 +99,9 @@ public abstract class ClassScanner {
                         && !Modifier.isAbstract(clazz.getModifiers());//I don't want abstract classes
             }
 
+            /*
             @Override
             protected void onScanResult(Class clazz) {
-                callback.accept(clazz);
-                /*
                 Constructor constructor = null;
                 try {
                     constructor = clazz.getDeclaredConstructor();
@@ -106,8 +116,8 @@ public abstract class ClassScanner {
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
-                */
             }
+            */
         }.scan();
     }
 }

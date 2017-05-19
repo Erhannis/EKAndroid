@@ -25,19 +25,19 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
 
-    compile 'net.sourceforge.streamsupport:streamsupport:1.5.4'
-    compile 'net.sourceforge.streamsupport:streamsupport-cfuture:1.5.4'
-    compile 'net.sourceforge.streamsupport:streamsupport-atomic:1.5.4'
-    compile 'net.sourceforge.streamsupport:streamsupport-flow:1.5.4'
-    compile 'net.sourceforge.streamsupport:streamsupport-literal:1.5.4'
+//    compile 'net.sourceforge.streamsupport:streamsupport:1.5.4'
+//    compile 'net.sourceforge.streamsupport:streamsupport-cfuture:1.5.4'
+//    compile 'net.sourceforge.streamsupport:streamsupport-atomic:1.5.4'
+//    compile 'net.sourceforge.streamsupport:streamsupport-flow:1.5.4'
+//    compile 'net.sourceforge.streamsupport:streamsupport-literal:1.5.4'
 
     testCompile 'junit:junit:4.12'
 }
 
 apply plugin: 'maven'
 
-group = 'com.vogella.libraries'
-version = '1.0'
+group = 'com.erhannis.android'
+version = '0.1.0-SNAPSHOT'
 
 uploadArchives {
     repositories {
