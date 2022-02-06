@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  * A fragment representing a list of Items.
  * Use:
  * Add a `androidx.fragment.app.FragmentContainerView` to your layout.  In your activity `onCreate`:<br/>
- * ListFragment listFragment = ListFragment.newInstance(Arrays.asList("do what you want", "'cause a pirate is free", "you are a pirate"), null, null);<br/>
+ * ListFragment&lt;String&gt; listFragment = new ListFragment&lt;&gt;(Arrays.asList("do what you want", "'cause a pirate is free", "you are a pirate"), x -> {}, x -> {});<br/>
  * <br/>
  * FragmentTransaction ft = getSupportFragmentManager().beginTransaction();<br/>
  * ft.replace(R.id.fragmentContainerView, listFragment);<br/>
@@ -28,9 +28,10 @@ import java.util.function.Consumer;
  * ft.commit();<br/>
  */
 public class ListFragment<T> extends Fragment {
-    private List<T> mRows;
-    private Consumer<T> onClickHandler;
-    private Consumer<T> onLongClickHandler;
+    List<T> mRows;
+    ArrayAdapter<T> adapter;
+    Consumer<T> onClickHandler;
+    Consumer<T> onLongClickHandler;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -39,27 +40,22 @@ public class ListFragment<T> extends Fragment {
     public ListFragment() {
     }
 
+    public ListFragment(List<T> rows, Consumer<T> onClickHandler, Consumer<T> onLongClickHandler) {
+        this.mRows = rows;
+        this.onClickHandler = onClickHandler;
+        this.onLongClickHandler = onLongClickHandler;
+        this.setRetainInstance(true);
+    }
+
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
     public static <T> ListFragment<T> newInstance(List<T> rows, Consumer<T> onClickHandler, Consumer<T> onLongClickHandler) {
-        ListFragment fragment = new ListFragment();
-//        Bundle args = new Bundle();
-//        args.putInt(ARG_COLUMN_COUNT, columnCount);
-//        fragment.setArguments(args);
-        fragment.mRows = rows;
-        fragment.onClickHandler = onClickHandler;
-        fragment.onLongClickHandler = onLongClickHandler;
-        fragment.setRetainInstance(true);
-        return fragment;
+        return new ListFragment<>(rows, onClickHandler, onLongClickHandler);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            //mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
     }
 
     @Override
@@ -70,8 +66,39 @@ public class ListFragment<T> extends Fragment {
         if (view instanceof ListView) {
             Context context = view.getContext();
             ListView listView = (ListView) view;
-            listView.setAdapter(new ArrayAdapter<T>(context, android.R.layout.simple_list_item_1, mRows));
+            adapter = new ArrayAdapter<T>(context, android.R.layout.simple_list_item_1, mRows);
+            listView.setAdapter(adapter);
+            listView.setOnItemClickListener((adapterView, view1, idx, id) -> {
+                onClickHandler.accept(mRows.get(idx)); //TODO COULD encounter race condition if list changed
+            });
+            listView.setOnItemLongClickListener((adapterView, view1, idx, id) -> {
+                if (onLongClickHandler != null) {
+                    onLongClickHandler.accept(mRows.get(idx)); //TODO COULD encounter race condition if list changed
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         }
         return view;
+    }
+
+    public void setList(List<T> rows) {
+        this.mRows = rows;
+        try {
+            adapter.clear();
+            adapter.addAll(mRows);
+            adapter.notifyDataSetChanged();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    public int getCount() {
+        return mRows.size();
+    }
+
+    public T getItem(int i) {
+        return mRows.get(i);
     }
 }

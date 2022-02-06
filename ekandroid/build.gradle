@@ -1,14 +1,15 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 31
+    buildToolsVersion "25.0.3"
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 31
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0-SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -17,7 +18,8 @@ android {
         }
     }
     compileOptions {
-        //coreLibraryDesugaringEnabled true
+        // Not sure this does anything; apparently you need it in the depender app, too, regardless
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -28,12 +30,13 @@ android {
 
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.0'
+    //implementation 'androidx.recyclerview:recyclerview:1.2.1'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.5"
 
 //    compile 'net.sourceforge.streamsupport:streamsupport:1.5.4'
 //    compile 'net.sourceforge.streamsupport:streamsupport-cfuture:1.5.4'
@@ -59,7 +62,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.erhannis.android'
                 artifactId = 'ekandroid'
-                version = '0.1.0-SNAPSHOT'
+                version = android.defaultConfig.versionName
             }
             // Creates a Maven publication called “debug”.
             debug(MavenPublication) {
@@ -68,7 +71,7 @@ afterEvaluate {
 
                 groupId = 'com.erhannis.android'
                 artifactId = 'ekandroid'
-                version = '0.1.0-SNAPSHOT'
+                version = android.defaultConfig.versionName
             }
         }
     }
