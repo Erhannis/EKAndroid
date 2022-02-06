@@ -18,6 +18,14 @@ import java.util.function.Consumer;
 
 /**
  * A fragment representing a list of Items.
+ * Use:
+ * Add a `androidx.fragment.app.FragmentContainerView` to your layout.  In your activity `onCreate`:<br/>
+ * ListFragment listFragment = ListFragment.newInstance(Arrays.asList("do what you want", "'cause a pirate is free", "you are a pirate"), null, null);<br/>
+ * <br/>
+ * FragmentTransaction ft = getSupportFragmentManager().beginTransaction();<br/>
+ * ft.replace(R.id.fragmentContainerView, listFragment);<br/>
+ * ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);<br/>
+ * ft.commit();<br/>
  */
 public class ListFragment<T> extends Fragment {
     private List<T> mRows;
@@ -41,6 +49,7 @@ public class ListFragment<T> extends Fragment {
         fragment.mRows = rows;
         fragment.onClickHandler = onClickHandler;
         fragment.onLongClickHandler = onLongClickHandler;
+        fragment.setRetainInstance(true);
         return fragment;
     }
 
