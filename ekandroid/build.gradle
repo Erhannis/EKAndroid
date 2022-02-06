@@ -29,13 +29,12 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
     //implementation 'androidx.recyclerview:recyclerview:1.2.1'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.5"
 
 //    compile 'net.sourceforge.streamsupport:streamsupport:1.5.4'
