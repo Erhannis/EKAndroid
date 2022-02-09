@@ -137,12 +137,23 @@ public class Dialogs {
         }
     }
 
+    /**
+     * DO NOT RUN FROM MAIN THREAD.  It would deadlock, but I throw a RuntimeException instead.
+     * @param act
+     * @param title
+     * @param def
+     * @return
+     */
     public static String stringInputDialog(Activity act, String title, String def) {
         // Partly from https://stackoverflow.com/a/10904665/513038
 
         //TODO This may not need to be blocking
         String[] result = new String[1];
         CountDownLatch cdl = new CountDownLatch(1);
+
+        if (Misc.isMainThread()) {
+            throw new RuntimeException("Do not run stringInputDialog on main thread!");
+        }
 
         Misc.runOnUiThread(() -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(act);
@@ -175,6 +186,7 @@ public class Dialogs {
 
             builder.show();
         });
+
         try {
             cdl.await();
         } catch (InterruptedException e) {

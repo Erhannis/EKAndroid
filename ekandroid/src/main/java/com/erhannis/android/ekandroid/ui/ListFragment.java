@@ -20,10 +20,24 @@ import java.util.function.Consumer;
  * A fragment representing a list of Items.
  * Use:
  * Add a `androidx.fragment.app.FragmentContainerView` to your layout.  In your activity `onCreate`:<br/>
+ * (THIS WILL RECREATE THE FRAGMENT ON E.G. ORIENTATION CHANGE)<br/>
  * ListFragment&lt;String&gt; listFragment = new ListFragment&lt;&gt;(Arrays.asList("do what you want", "'cause a pirate is free", "you are a pirate"), x -> {}, x -> {});<br/>
  * <br/>
  * FragmentTransaction ft = getSupportFragmentManager().beginTransaction();<br/>
  * ft.replace(R.id.fragmentContainerView, listFragment);<br/>
+ * ft.commit();<br/>
+ * <br/>
+ * To retain instance properly across Activity recreation, in your activity `onCreate`:<br/>
+ * FragmentManager fm = getSupportFragmentManager();<br/>
+ * ListFragment&lt;String&gt; f = (ListFragment&lt;String&gt;) fm.findFragmentByTag("some_string_such_as_tag_list_fragment");<br/>
+ * if (f == null) {<br/>
+ *     // (Optionally do some processing or w/e here)<br/>
+ *     f = new ListFragment&lt;&gt;(Arrays.asList("do what you want", "'cause a pirate is free", "you are a pirate"), x -> {}, x -> {});<br/>
+ *     fm.beginTransaction().add(f, "some_string_such_as_tag_list_fragment").commit();<br/>
+ * }<br/>
+ * // (Optionally save a reference to the fragment here)<br/>
+ * FragmentTransaction ft = fm.beginTransaction();<br/>
+ * ft.replace(R.id.fragmentContainerView, f);<br/>
  * ft.commit();<br/>
  */
 public class ListFragment<T> extends Fragment {

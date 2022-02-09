@@ -2,6 +2,7 @@ package com.erhannis.android.ekandroid.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,10 +32,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
 
+// Frankly, I'm not totally sure this class is thread safe.
+
+/**
+ * Fragment for managing {@link com.erhannis.mathnstuff.utils.Options}.
+ * See {@link com.erhannis.android.ekandroid.ui.ListFragment} for creation tips.
+ */
 public class OptionsFragment extends Fragment {
     public static final String DEFAULT_OPTIONS_FILENAME = "options.dat";
+    private final String message;
     public final String optionsFilename;
     private final Options options;
+
+    private final Handler handler = Misc.startHandlerThread();
 
     private TextView tvMessage;
     private Button btnReload;
@@ -45,6 +55,7 @@ public class OptionsFragment extends Fragment {
      * fragment (e.g. upon screen orientation changes).
      */
     public OptionsFragment() {
+        message = null;
         optionsFilename = null;
         options = null;
         //TODO Throw exception?
@@ -54,23 +65,28 @@ public class OptionsFragment extends Fragment {
         this(options, DEFAULT_OPTIONS_FILENAME);
     }
 
-    public OptionsFragment(String message, Options options, String optionsFilename) {
-        this(options, optionsFilename);
-        this.tvMessage.setText(message);
+    public OptionsFragment(Options options, String optionsFilename) {
+        this("", options, optionsFilename);
     }
 
-    public OptionsFragment(Options options, String optionsFilename) {
+    public OptionsFragment(String message, Options options, String optionsFilename) {
         this.listFragment = new ListFragment<>(new ArrayList<>(), e -> {
             // On click
-            select(e.val);
+            handler.post(() -> {
+                select(e.val);
+            });
         }, e -> {
             // On long-press
-            delete(e.val);
+            handler.post(() -> {
+                delete(e.val);
+            });
         });
+        this.message = message;
         this.optionsFilename = optionsFilename;
         this.options = options;
         options.getOrDefault("OptionsFrame.AUTOSAVE_OPTIONS", true); // Preloading default
-        reload();
+        //reload(); // Can't reload until view created
+        this.setRetainInstance(true);
     }
 
     @Override
@@ -83,8 +99,16 @@ public class OptionsFragment extends Fragment {
         ft.replace(R.id.listFragmentContainer, listFragment);
         ft.commit();
 
+        this.tvMessage.setText(message);
+
         this.btnReload.setOnClickListener(v -> {
             reload();
+        });
+
+        Misc.runOnUiThread(() -> {
+            System.out.println("--> ocv.rui.reload");
+            reload();
+            System.out.println("<-- ocv.rui.reload");
         });
 
         return view;
@@ -203,7 +227,9 @@ public class OptionsFragment extends Fragment {
                     Misc.showToast(this.getActivity(), "Failed to save options to disk.");
                 }
             }
-            reload();
+            Misc.runOnUiThread(() -> {
+                reload();
+            });
         } else {
             Misc.showToast(this.getActivity(), "Sorry, null value; can't infer datatype");
             return;
@@ -221,7 +247,9 @@ public class OptionsFragment extends Fragment {
                     Misc.showToast(this.getActivity(), "Failed to save options to disk.");
                 }
             }
-            reload();
+            Misc.runOnUiThread(() -> {
+                reload();
+            });
         }
     }
 }
