@@ -114,7 +114,10 @@ public class OptionsFragment extends Fragment {
         return view;
     }
 
-    private void reload() {
+    /**
+     * Run on UI thread
+     */
+    public void reload() {
         ArrayList<Stringable<Map.Entry<String, Object>>> items = new ArrayList<>();
         FactoryHashMap<Object, HashSet<String>> reverse = new FactoryHashMap<>(new Factory<Object, HashSet<String>>() {
             @Override
